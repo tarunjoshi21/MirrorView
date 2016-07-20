@@ -71,12 +71,28 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             mCamera.stopPreview();
         }
 
-        Camera.Parameters parameters = mCamera.getParameters();
+        Camera.Parameters parameters = null;
+        try {
+             parameters = mCamera.getParameters();
+
+        }catch (Exception excep){
+            excep.printStackTrace();
+        }
+
+        width = parameters.getSupportedPreviewSizes().get(0).width;
+        height = parameters.getSupportedPreviewSizes().get(0).height;
+
+        for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
+            Log.i("CameraSize", size.width + "x" + size.height);
+        }
+
+
         Display display = ((WindowManager)context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
         if(display.getRotation() == Surface.ROTATION_0)
         {
-            parameters.setPreviewSize(height, width);
+            //  parameters.setPreviewSize(height, width);
+            parameters.setPreviewSize(width, height);
             mCamera.setDisplayOrientation(90);
         }
 
@@ -105,9 +121,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // empty. Take care of releasing the Camera preview in your activity.
     }
 
-    @Override
+   /* @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         // http://stackoverflow.com/questions/19577299/android-camera-preview-stretched
-    }
+    }*/
 }

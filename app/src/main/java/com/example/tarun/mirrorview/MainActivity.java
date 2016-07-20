@@ -12,8 +12,6 @@ import android.widget.Toast;
 
 import com.example.tarun.mirrorview.preview.CameraPreview;
 
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
 
     private Camera mCamera;
@@ -37,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
             mPreview = new CameraPreview(this, mCamera);
 
 
-
             FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
             preview.addView(mPreview);
         }
@@ -45,9 +42,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void releaseCamera() {
         if (mCamera != null) {
+            mPreview.getHolder().removeCallback(mPreview);
+            mCamera.stopPreview();
             mCamera.release();        // release the camera for other applications
-            mCamera = null;
             mPreview.isPreviewRunning = false;
+            mCamera = null;
+            mPreview = null;
         }
     }
 
@@ -55,6 +55,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         releaseCamera();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mCamera == null)
+            init();
     }
 
     /**
@@ -77,15 +84,15 @@ public class MainActivity extends AppCompatActivity {
 
             } else {*/
 
-                // No explanation needed, we can request the permission.
+            // No explanation needed, we can request the permission.
 
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.CAMERA},
-                        MY_PERMISSIONS_REQUEST_CAMERA);
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.CAMERA},
+                    MY_PERMISSIONS_REQUEST_CAMERA);
 
-                // MY_PERMISSIONS_REQUEST_CAMERA is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
+            // MY_PERMISSIONS_REQUEST_CAMERA is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
             //}
             return null;
         }
@@ -127,35 +134,5 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
-        final double ASPECT_TOLERANCE = 0.1;
-        double targetRatio=(double)h / w;
 
-        if (sizes == null) return null;
-
-        Camera.Size optimalSize = null;
-        double minDiff = Double.MAX_VALUE;
-
-        int targetHeight = h;
-
-        for (Camera.Size size : sizes) {
-            double ratio = (double) size.width / size.height;
-            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
-            if (Math.abs(size.height - targetHeight) < minDiff) {
-                optimalSize = size;
-                minDiff = Math.abs(size.height - targetHeight);
-            }
-        }
-
-        if (optimalSize == null) {
-            minDiff = Double.MAX_VALUE;
-            for (Camera.Size size : sizes) {
-                if (Math.abs(size.height - targetHeight) < minDiff) {
-                    optimalSize = size;
-                    minDiff = Math.abs(size.height - targetHeight);
-                }
-            }
-        }
-        return optimalSize;
-    }
 }
